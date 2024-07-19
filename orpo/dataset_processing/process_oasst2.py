@@ -1,4 +1,5 @@
-# ⓒ 2024 Joona Kytöniemi
+#!/usr/bin/env python3
+# MIT ⓒ2024 Joona Kytöniemi
 # Process raw Open Assistant data to ORPO format
 
 import sys
@@ -51,7 +52,6 @@ def extract_features(msg, label_override):
     if "replies" in msg and len(msg["replies"]) >= 2:
         assistant_replies = [reply for reply in msg["replies"] if reply["role"] == "assistant"]
         if len(assistant_replies) >= 2:
-            # NOTE! Override enabled due to the fact that the ranking sometimes sucks
             assistant_replies = reply_sorter(assistant_replies, label_override)
             chosen_reply = assistant_replies[0]
             rejected_reply = assistant_replies[-1]

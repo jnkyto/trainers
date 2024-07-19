@@ -1,4 +1,5 @@
-# ⓒ 2024 Joona Kytöniemi
+#!/usr/bin/env python3
+# MIT ⓒ2024 Joona Kytöniemi
 # Process raw Avoin Avustaja data to ORPO format
 
 import sys
