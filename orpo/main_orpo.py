@@ -58,7 +58,7 @@ def main(argv):
 
     if not args.dry_run:
         train_args = ORPOConfig(
-            beta=0.1,   # The lambda/alpha hyperparameter in the paper/code
+            beta=0.1,  # The lambda/alpha hyperparameter in the paper/code
             output_dir="./out/train_out",
             warmup_steps=args.warmup_steps,
             logging_steps=args.logging_steps,
@@ -118,8 +118,6 @@ def main(argv):
         # Torch barrier before unwrap and save
         trainer.accelerator.wait_for_everyone()
         # * save function to be added when it's actually necessary *
-
-
 
 
 if __name__ == "__main__":
