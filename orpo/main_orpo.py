@@ -4,7 +4,6 @@
 
 import os
 import sys
-import json
 import random
 
 from datetime import datetime
@@ -17,13 +16,11 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     DataCollatorForLanguageModeling,
-    TrainingArguments,
-    Trainer
 )
 
 default_model = 'LumiOpen/Poro-34B'
 curr_date = str(datetime.now().isoformat("T", "minutes")).replace(':', '')
-default_model_save_dir = "./output"  # without trailing forward-slash
+default_model_save_dir = "/scratch/project_462000615/kytoniem/models/orpo"  # without trailing forward-slash
 
 
 def argparser():
@@ -62,7 +59,7 @@ def main(argv):
     if not args.dry_run:
         train_args = ORPOConfig(
             beta=0.1,   # The lambda/alpha hyperparameter in the paper/code
-            output_dir="./out/train_output",
+            output_dir="./out/train_out",
             warmup_steps=args.warmup_steps,
             logging_steps=args.logging_steps,
 
