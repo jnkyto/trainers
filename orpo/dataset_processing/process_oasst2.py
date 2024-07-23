@@ -6,12 +6,18 @@ import sys
 import jsonlines
 from argparse import ArgumentParser, FileType
 
+default_prefix = "<|user|>Toimit henkilökohtaisena assistenttina. Tehtäväsi on vastata seuraavaan viestiin parhaan tietämyksesi mukaan. Kysymys: "
+default_suffix = "<|assistant|>"
+
 
 def argparse():
     ap = ArgumentParser()
     ap.add_argument("--input", type=FileType('r'), metavar='F', required=True)
     ap.add_argument("--output", type=FileType('w+'), metavar='F', required=True)
     ap.add_argument("--label_override", action="store_true")
+    # TODO: Need to implement args in a different way where they can be freely accessed within every method
+    # ap.add_argument("--prefix", type=str, default=default_prefix)
+    # ap.add_argument("--suffix", type=str, default=default_suffix)
     return ap
 
 
@@ -56,7 +62,7 @@ def extract_features(msg, label_override):
             chosen_reply = assistant_replies[0]
             rejected_reply = assistant_replies[-1]
             prompt_replies.append({
-                "prompt": msg["text"],
+                "prompt": f'{default_prefix}{msg["text"]}{default_suffix}',
                 "chosen": chosen_reply[0]["text"],
                 "rejected": rejected_reply[0]["text"]}
             )
