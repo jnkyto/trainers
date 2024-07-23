@@ -12,6 +12,7 @@ from argparse import ArgumentParser
 from accelerate.utils import set_seed
 from datasets import load_dataset, Dataset
 from trl import ORPOConfig, ORPOTrainer
+from trl.trainer import ConstantLengthDataset
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -56,11 +57,18 @@ def main(argv):
 
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
 
+    ds = ConstantLengthDataset(
+        tokenizer=tokenizer,
+        dataset=ds,
+        dataset_text_field="text"
+    )
+
     print(ds)
 
     if not args.dry_run:
         train_args = ORPOConfig(
             beta=0.1,  # The lambda/alpha hyperparameter in the paper/code
+            max_length=256,
             max_prompt_length=96,
             output_dir="./out/train_out",
             warmup_steps=args.warmup_steps,
@@ -83,6 +91,7 @@ def main(argv):
             learning_rate=args.learning_rate,
 
             lr_scheduler_type="constant_with_warmup",
+            remove_unused_columns=False,
             bf16=True,
             bf16_full_eval=True,
             log_on_each_node=False,
@@ -100,7 +109,6 @@ def main(argv):
         collator = DataCollatorWithPadding(
             tokenizer=tokenizer,
             return_tensors='pt',
-            max_length=184,
             padding="max_length"
         )
 
@@ -110,7 +118,7 @@ def main(argv):
             train_dataset=ds["train"],
             tokenizer=tokenizer,
             data_collator=collator,
-            eval_dataset=ds["test"]
+            eval_dataset=ds["test"],
         )
 
         trainer.accelerator.print(f"DeepSpeed info:\n{trainer.deepspeed}")
