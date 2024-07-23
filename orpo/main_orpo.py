@@ -12,7 +12,6 @@ from argparse import ArgumentParser
 from accelerate.utils import set_seed
 from datasets import load_dataset, Dataset
 from trl import ORPOConfig, ORPOTrainer
-from trl.trainer import ConstantLengthDataset
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -56,12 +55,6 @@ def main(argv):
     ds = ds.train_test_split(test_size=0.15)
 
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
-
-    ds = ConstantLengthDataset(
-        tokenizer=tokenizer,
-        dataset=ds,
-        dataset_text_field="text"
-    )
 
     print(ds)
 
