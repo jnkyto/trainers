@@ -16,6 +16,7 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     DataCollatorForLanguageModeling,
+    DataCollatorWithPadding
 )
 
 default_model = 'LumiOpen/Poro-34B'
@@ -60,6 +61,7 @@ def main(argv):
     if not args.dry_run:
         train_args = ORPOConfig(
             beta=0.1,  # The lambda/alpha hyperparameter in the paper/code
+            max_prompt_length=96,
             output_dir="./out/train_out",
             warmup_steps=args.warmup_steps,
             logging_steps=args.logging_steps,
@@ -95,10 +97,11 @@ def main(argv):
         if args.gradient_steps != 1:
             model.gradient_checkpointing_enable()
 
-        collator = DataCollatorForLanguageModeling(
+        collator = DataCollatorWithPadding(
             tokenizer=tokenizer,
             return_tensors='pt',
-            mlm=False,
+            max_length=184,
+            padding="max_length"
         )
 
         trainer = ORPOTrainer(
