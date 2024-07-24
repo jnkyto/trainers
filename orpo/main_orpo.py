@@ -9,7 +9,6 @@ import random
 from datetime import datetime
 from argparse import ArgumentParser
 
-import torch.cuda
 from peft import LoraConfig
 from accelerate.utils import set_seed
 from datasets import load_dataset, Dataset
@@ -61,9 +60,6 @@ def main(argv):
     print(ds)
 
     if not args.dry_run:
-        supports_fa: bool = torch.cuda.get_device_capability()[0] >= 8
-        attn_implementation = "flash_attention_2" if supports_fa else "eager"
-        
         peft_config = LoraConfig(
             r=16,
             lora_alpha=32,
@@ -116,7 +112,6 @@ def main(argv):
         model = AutoModelForCausalLM.from_pretrained(
             args.model,
             torch_dtype="auto",
-            attn_implementation=attn_implementation
         )
 
         if args.gradient_steps != 1:
