@@ -156,7 +156,7 @@ def main(argv):
             unwrapped_model.save_pretrained(
                 f"{default_model_save_dir}/{saved_model_name}",
                 state_dict=state_dict,
-                safe_serialization=args.safetensors
+                safe_serialization=True
             )
             print(f"Fine-tuned model saved in {default_model_save_dir}/{saved_model_name}.")
 
