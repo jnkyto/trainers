@@ -9,6 +9,8 @@ import random
 from datetime import datetime
 from argparse import ArgumentParser
 
+import torch.cuda
+from peft import LoraConfig
 from accelerate.utils import set_seed
 from datasets import load_dataset, Dataset
 from trl import ORPOConfig, ORPOTrainer
@@ -59,6 +61,26 @@ def main(argv):
     print(ds)
 
     if not args.dry_run:
+        supports_fa: bool = torch.cuda.get_device_capability()[0] >= 8
+        attn_implementation = "flash_attention_2" if supports_fa else "eager"
+        
+        peft_config = LoraConfig(
+            r=16,
+            lora_alpha=32,
+            lora_dropout=0.05,
+            bias="none",
+            task_type="CAUSAL_LM",
+            target_modules=[
+                "up_proj",
+                "down_proj",
+                "gate_proj",
+                "k_proj",
+                "q_proj",
+                "v_proj",
+                "o_proj"
+            ]
+        )
+        
         train_args = ORPOConfig(
             beta=0.1,  # The lambda/alpha hyperparameter in the paper/code
             max_length=256,
@@ -93,7 +115,8 @@ def main(argv):
 
         model = AutoModelForCausalLM.from_pretrained(
             args.model,
-            torch_dtype="auto"
+            torch_dtype="auto",
+            attn_implementation=attn_implementation
         )
 
         if args.gradient_steps != 1:
@@ -112,6 +135,7 @@ def main(argv):
             tokenizer=tokenizer,
             data_collator=collator,
             eval_dataset=ds["test"],
+            peft_config=peft_config
         )
 
         trainer.accelerator.print(f"DeepSpeed info:\n{trainer.deepspeed}")
