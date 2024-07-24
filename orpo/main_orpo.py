@@ -116,18 +116,11 @@ def main(argv):
         if args.gradient_steps != 1:
             model.gradient_checkpointing_enable()
 
-        collator = DataCollatorForLanguageModeling(
-            tokenizer=tokenizer,
-            return_tensors='pt',
-            mlm=False
-        )
-
         trainer = ORPOTrainer(
             model=model,
             args=train_args,
             train_dataset=ds["train"],
             tokenizer=tokenizer,
-            data_collator=collator,
             eval_dataset=ds["test"],
             peft_config=peft_config
         )
