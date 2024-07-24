@@ -9,14 +9,14 @@ import random
 from datetime import datetime
 from argparse import ArgumentParser
 
+import torch.cuda
 from peft import LoraConfig
 from accelerate.utils import set_seed
-from datasets import load_dataset, Dataset
+from datasets import load_dataset
 from trl import ORPOConfig, ORPOTrainer
 from transformers import (
     AutoTokenizer,
-    AutoModelForCausalLM,
-    DataCollatorForLanguageModeling
+    AutoModelForCausalLM
 )
 
 default_model = 'LumiOpen/Poro-34B'
@@ -41,6 +41,7 @@ def argparser():
     ap.add_argument("--verbose", action="store_true")
     ap.add_argument("--model", type=str, default=default_model)
     ap.add_argument("--tokenizer", type=str, default=default_model)
+    ap.add_argument("--flash_attn", action="store_true")
     ap.add_argument("--dry_run", action="store_true")
     return ap
 
@@ -59,6 +60,9 @@ def main(argv):
     print(ds)
 
     if not args.dry_run:
+        supports_fa: bool = torch.cuda.get_device_capability()[0] >= 8
+        attn_implementation = "flash_attention_2" if supports_fa and args.flash_attn else "eager"
+
         peft_config = LoraConfig(
             r=16,
             lora_alpha=32,
@@ -111,6 +115,7 @@ def main(argv):
         model = AutoModelForCausalLM.from_pretrained(
             args.model,
             torch_dtype="auto",
+            attn_implementation=attn_implementation
         )
 
         if args.gradient_steps != 1:
