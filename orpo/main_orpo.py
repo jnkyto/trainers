@@ -4,6 +4,7 @@
 
 import os
 import sys
+import json
 import random
 
 from datetime import datetime
@@ -138,7 +139,38 @@ def main(argv):
 
         # Torch barrier before unwrap and save
         trainer.accelerator.wait_for_everyone()
-        # * save function to be added when it's actually necessary *
+
+        if getattr(trainer, "deepspeed"):
+            state_dict = trainer.accelerator.get_state_dict(trainer.deepspeed)
+            unwrapped_model = trainer.accelerator.unwrap_model(trainer.deepspeed)
+        else:
+            state_dict = trainer.accelerator.get_state_dict(trainer.model)
+            unwrapped_model = trainer.accelerator.unwrap_model(trainer.model)
+
+            # Save model only in main process and make other processes wait with torch barrier
+            if trainer.accelerator.is_main_process:
+                if not os.path.exists(default_model_save_dir):
+                    os.makedirs(default_model_save_dir)
+
+                saved_model_name = f"{curr_date}-{str(args.model).split('/')[1]}"
+                unwrapped_model.save_pretrained(
+                    f"{default_model_save_dir}/{saved_model_name}",
+                    state_dict=state_dict,
+                    safe_serialization=args.safetensors
+                )
+                print(f"Fine-tuned model saved in {default_model_save_dir}/{saved_model_name}.")
+
+                hyperparams = {
+                    "batch_size": args.batch_size, "epochs": args.epochs, "seed": args.seed,
+                    "max_length": args.max_length, "learning_rate": f"{args.learning_rate}",
+                    "data_length": args.data_length, "gradient_checkpointing": train_args.gradient_checkpointing,
+                    "gradient_steps": args.gradient_steps, "warmup_steps": args.warmup_steps
+                }
+                with open(f"{default_model_save_dir}/{saved_model_name}/hyperparams.json", "w") as f:
+                    json.dump(hyperparams, f)
+
+        trainer.accelerator.wait_for_everyone()
+        trainer.accelerator.end_training()
 
 
 if __name__ == "__main__":
