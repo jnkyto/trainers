@@ -11,6 +11,8 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 import torch.cuda
+import torch.distributed
+
 from peft import LoraConfig
 from accelerate.utils import set_seed
 from datasets import load_dataset
@@ -28,6 +30,7 @@ default_model_save_dir = "/scratch/project_462000615/kytoniem/models/orpo"  # wi
 def argparser():
     ap = ArgumentParser()
     ap.add_argument("--input_data", type=str, required=True)
+    ap.add_argument("--model_save_dir", type=str, default=default_model_save_dir)
     ap.add_argument("--max_length", type=int, default=1024)
     ap.add_argument("--batch_size", type=int, default=16)
     ap.add_argument("--epochs", type=int, default=4)
@@ -52,15 +55,15 @@ def main(argv):
     set_seed(args.seed)
 
     ds = load_dataset("json", data_files=args.input_data)["train"]
-
-    ds.shuffle(random.seed(args.seed))
+    select_len = len(ds) if len(ds) < args.data_length else args.data_length
+    ds = ds.shuffle(random.seed(args.seed)).select(range(select_len))
     ds = ds.train_test_split(test_size=0.15)
 
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
-
-    print(ds)
-
     if not args.dry_run:
+        torch.distributed.barrier()  # the trainer isn't initialized yet so let's try this...
+
+        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
+
         supports_fa: bool = torch.cuda.get_device_capability()[0] >= 8
         attn_implementation = "flash_attention_2" if supports_fa and args.flash_attn else "eager"
 
@@ -119,7 +122,7 @@ def main(argv):
             attn_implementation=attn_implementation
         )
 
-        if args.gradient_steps != 1:
+        if args.gradient_steps > 1:
             model.gradient_checkpointing_enable()
 
         trainer = ORPOTrainer(
@@ -149,24 +152,24 @@ def main(argv):
 
         # Save model only in main process and make other processes wait with torch barrier
         if trainer.accelerator.is_main_process:
-            if not os.path.exists(default_model_save_dir):
-                os.makedirs(default_model_save_dir)
+            if not os.path.exists(args.model_save_dir):
+                os.makedirs(args.model_save_dir)
 
             saved_model_name = f"{curr_date}-{str(args.model).split('/')[1]}"
             unwrapped_model.save_pretrained(
-                f"{default_model_save_dir}/{saved_model_name}",
+                f"{args.model_save_dir}/{saved_model_name}",
                 state_dict=state_dict,
                 safe_serialization=True
             )
-            print(f"Fine-tuned model saved in {default_model_save_dir}/{saved_model_name}.")
+            print(f"Fine-tuned model saved to {args.model_save_dir}/{saved_model_name}.")
 
             hyperparams = {
                 "batch_size": args.batch_size, "epochs": args.epochs, "seed": args.seed,
                 "max_length": args.max_length, "learning_rate": f"{args.learning_rate}",
-                "data_length": args.data_length, "gradient_checkpointing": train_args.gradient_checkpointing,
+                "data_length": select_len, "gradient_checkpointing": train_args.gradient_checkpointing,
                 "gradient_steps": args.gradient_steps, "warmup_steps": args.warmup_steps
             }
-            with open(f"{default_model_save_dir}/{saved_model_name}/hyperparams.json", "w") as f:
+            with open(f"{args.model_save_dir}/{saved_model_name}/hyperparams.json", "w") as f:
                 json.dump(hyperparams, f)
 
         trainer.accelerator.wait_for_everyone()
