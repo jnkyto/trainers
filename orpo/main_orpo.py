@@ -59,7 +59,8 @@ def main(argv):
     ds = ds.train_test_split(test_size=0.15)
 
     if not args.dry_run:
-        torch.cuda.synchronize()  # ok, let's try this instead...
+        # TODO: need to put some kind of a synchronization barrier here! but nothing works!!!
+        # having no barrier means leaving it up to chance
 
         tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
 
