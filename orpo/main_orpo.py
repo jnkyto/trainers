@@ -11,7 +11,6 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 import torch.cuda
-import torch.distributed
 
 from peft import LoraConfig
 from accelerate.utils import set_seed
@@ -60,7 +59,7 @@ def main(argv):
     ds = ds.train_test_split(test_size=0.15)
 
     if not args.dry_run:
-        torch.distributed.barrier()  # the trainer isn't initialized yet so let's try this...
+        torch.cuda.synchronize()  # ok, let's try this instead...
 
         tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
 
