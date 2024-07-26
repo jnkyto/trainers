@@ -45,6 +45,7 @@ def argparser():
     ap.add_argument("--model", type=str, default=default_model)
     ap.add_argument("--tokenizer", type=str, default=default_model)
     ap.add_argument("--flash_attn", action="store_true")
+    ap.add_argument("--lora", action="store_true")
     ap.add_argument("--dry_run", action="store_true")
     return ap
 
@@ -131,7 +132,7 @@ def main(argv):
             train_dataset=ds["train"],
             tokenizer=tokenizer,
             eval_dataset=ds["test"],
-            peft_config=peft_config
+            peft_config=peft_config if args.lora else None
         )
 
         trainer.accelerator.print(f"DeepSpeed info:\n{trainer.deepspeed}")
