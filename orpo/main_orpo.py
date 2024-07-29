@@ -36,11 +36,11 @@ def argparser():
     ap.add_argument("--learning_rate", type=float, default=5e-5)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--data_length", type=int, default=8192)
-    ap.add_argument("--gradient_steps", type=int, default=1)
+    ap.add_argument("--gradient_steps", type=int, default=1)  # set this to 1 to disable grad checkpoints
     ap.add_argument("--warmup_steps", type=int, default=0)
     ap.add_argument("--eval_steps", type=int, default=100)
     ap.add_argument("--logging_steps", type=int, default=100)
-    ap.add_argument("--save_steps", type=int, default=0)   # these don't work so just don't use 'em :)
+    ap.add_argument("--save_steps", type=int, default=0)  # these don't work so just don't use 'em :)
     ap.add_argument("--verbose", action="store_true")
     ap.add_argument("--model", type=str, default=default_model)
     ap.add_argument("--tokenizer", type=str, default=default_model)
@@ -163,12 +163,14 @@ def main(argv):
                 safe_serialization=True
             )
             print(f"Fine-tuned model saved to {args.model_save_dir}/{saved_model_name}.")
+            dataset_file_name = str(args.input_data).split("/")[-1]
 
             hyperparams = {
                 "batch_size": args.batch_size, "epochs": args.epochs, "seed": args.seed,
                 "max_length": args.max_length, "learning_rate": f"{args.learning_rate}",
                 "data_length": select_len, "gradient_checkpointing": train_args.gradient_checkpointing,
-                "gradient_steps": args.gradient_steps, "warmup_steps": args.warmup_steps
+                "gradient_steps": args.gradient_steps, "warmup_steps": args.warmup_steps,
+                "dataset": dataset_file_name
             }
             with open(f"{args.model_save_dir}/{saved_model_name}/hyperparams.json", "w") as f:
                 json.dump(hyperparams, f)
