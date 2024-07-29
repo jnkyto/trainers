@@ -6,7 +6,7 @@ import sys
 import jsonlines
 from argparse import ArgumentParser, FileType
 
-default_prefix = "<|user|>Toimit henkilökohtaisena assistenttina. Tehtäväsi on vastata seuraavaan viestiin parhaan tietämyksesi mukaan. Kysymys: "
+default_prefix = "<|user|>Toimit henkilökohtaisena assistenttina. Tehtäväsi on vastata seuraavaan viestiin parhaan tietämyksesi mukaan. Viesti: "
 default_suffix = "<|assistant|>"
 
 
