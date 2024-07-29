@@ -60,8 +60,7 @@ def main(argv):
     ds = ds.train_test_split(test_size=0.15)
 
     if not args.dry_run:
-        # TODO: need to put some kind of a synchronization barrier here! but nothing works!!!
-        # having no barrier means leaving it up to chance
+        # Sync barrier here once I figure out what works
 
         tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
 
