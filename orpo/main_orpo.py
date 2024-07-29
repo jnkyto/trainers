@@ -87,9 +87,9 @@ def main(argv):
         
         train_args = ORPOConfig(
             beta=0.1,  # The lambda/alpha hyperparameter in the paper/code
-            max_length=256,
+            max_length=args.max_length,
             max_prompt_length=96,
-            output_dir="./out/train_out",
+            output_dir="./out/tf_out",
             warmup_steps=args.warmup_steps,
             logging_steps=args.logging_steps,
 
@@ -130,8 +130,8 @@ def main(argv):
             model=model,
             args=train_args,
             train_dataset=ds["train"],
-            tokenizer=tokenizer,
             eval_dataset=ds["test"],
+            tokenizer=tokenizer,
             peft_config=peft_config if args.lora else None
         )
 
@@ -175,6 +175,7 @@ def main(argv):
 
         trainer.accelerator.wait_for_everyone()
         trainer.accelerator.end_training()
+        return 0
 
 
 if __name__ == "__main__":
