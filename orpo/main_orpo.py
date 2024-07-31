@@ -119,7 +119,8 @@ def main(argv):
         model = AutoModelForCausalLM.from_pretrained(
             args.model,
             torch_dtype="auto",
-            attn_implementation=attn_implementation
+            attn_implementation=attn_implementation,
+            trust_remote_code=True
         )
 
         if args.gradient_steps > 1:
