@@ -62,7 +62,7 @@ def main(argv):
     if not args.dry_run:
         # Sync barrier here once I figure out what works
 
-        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
+        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer, trust_remote_code=True)
 
         supports_fa: bool = torch.cuda.get_device_capability()[0] >= 8
         attn_implementation = "flash_attention_2" if supports_fa and args.flash_attn else "eager"
