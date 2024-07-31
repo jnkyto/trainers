@@ -45,7 +45,7 @@ def argparser():
     ap.add_argument("--model", type=str, default=default_model)
     ap.add_argument("--tokenizer", type=str, default=default_model)
     ap.add_argument("--flash_attn", action="store_true")
-    ap.add_argument("--lora", action="store_true")
+    ap.add_argument("--no_target_modules", action="store_true")
     ap.add_argument("--dry_run", action="store_true")
     return ap
 
@@ -73,7 +73,7 @@ def main(argv):
             lora_dropout=0.05,
             bias="none",
             task_type="CAUSAL_LM",
-            target_modules=[
+            target_modules=None if args.no_target_modules else [
                 "up_proj",
                 "down_proj",
                 "gate_proj",
@@ -132,7 +132,7 @@ def main(argv):
             train_dataset=ds["train"],
             eval_dataset=ds["test"],
             tokenizer=tokenizer,
-            peft_config=peft_config if args.lora else None
+            peft_config=peft_config
         )
 
         trainer.accelerator.print(f"DeepSpeed info:\n{trainer.deepspeed}")
