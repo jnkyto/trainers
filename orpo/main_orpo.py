@@ -151,7 +151,7 @@ def main(argv):
             state_dict = trainer.accelerator.get_state_dict(trainer.model)
             unwrapped_model = trainer.accelerator.unwrap_model(trainer.model)
 
-        merged_model = PeftModel.from_pretrained(unwrapped_model, f"ORPO-{curr_date}")
+        merged_model = PeftModel.from_pretrained(unwrapped_model, args.model)
 
         # Save model only in main process and make other processes wait with torch barrier
         if trainer.accelerator.is_main_process:
