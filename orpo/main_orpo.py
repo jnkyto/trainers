@@ -114,10 +114,6 @@ def main(argv):
             log_level="info",
         )
 
-        # Dummy trainer for torch barrier before model loading
-        dummy_trainer = ORPOTrainer()
-        dummy_trainer.accelerator.wait_for_everyone()
-
         model = AutoModelForCausalLM.from_pretrained(
             args.model,
             torch_dtype="auto",
@@ -136,7 +132,6 @@ def main(argv):
             tokenizer=tokenizer,
             peft_config=peft_config
         )
-        del dummy_trainer
 
         trainer.accelerator.print(f"DeepSpeed info:\n{trainer.deepspeed}")
 
