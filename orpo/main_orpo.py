@@ -166,15 +166,13 @@ def main(argv):
             state_dict = trainer.accelerator.get_state_dict(trainer.model)
             unwrapped_model = trainer.accelerator.unwrap_model(trainer.model)
 
-        merged_model = PeftModel.from_pretrained(unwrapped_model, args.model)
-
         # Save model only in main process and make other processes wait with torch barrier
         if trainer.accelerator.is_main_process:
             if not os.path.exists(args.model_save_dir):
                 os.makedirs(args.model_save_dir)
 
             saved_model_name = f"{curr_date}-{str(args.model).split('/')[1]}"
-            merged_model.save_pretrained(
+            unwrapped_model.save_pretrained(
                 f"{args.model_save_dir}/{saved_model_name}",
                 state_dict=state_dict,
                 safe_serialization=True
