@@ -60,8 +60,6 @@ def main(argv):
     ds = ds.train_test_split(test_size=0.15)
 
     if not args.dry_run:
-        # Sync barrier here once I figure out what works
-
         tokenizer = AutoTokenizer.from_pretrained(args.tokenizer, trust_remote_code=True)
 
         supports_fa: bool = torch.cuda.get_device_capability()[0] >= 8
