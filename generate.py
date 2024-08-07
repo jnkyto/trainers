@@ -35,7 +35,7 @@ def main(argv):
         prompt = chat_template.format(usr_in)
         decoded = tokenizer.decode(
             model.generate(**tokenizer(prompt, return_tensors="pt").to("cuda"), max_new_tokens=192)[0], do_sample=True,
-            top_k=50, repetition_penalty=2)
+            top_k=30, repetition_penalty=2, length_penalty=1.25)
         print(str(decoded).split("<|response|>", 1)[1] + "\n")
 
 
