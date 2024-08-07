@@ -6,8 +6,8 @@ import sys
 import jsonlines
 from argparse import ArgumentParser, FileType
 
-default_prefix = "<|user|>Toimit henkilökohtaisena assistenttina. Tehtäväsi on vastata seuraavaan viestiin parhaan tietämyksesi mukaan. Viesti: "
-default_suffix = "<|assistant|>"
+default_prefix = "<|im_start|>system\nToimit henkilökohtaisena assistenttina. Tehtäväsi on vastata seuraavaan viestiin parhaan tietämyksesi mukaan. Vastaa viestiin kattavasti, mutta älä kuitenkaan toista itseäsi tai kirjoita mitään ylimääräistä. Kerro vastauksesi seuraavan indikaattorin jälkeen.\n<|im_start|>user\n"
+default_suffix = "\n<|im_start|>assistant\n"
 
 
 def argparse():
