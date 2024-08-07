@@ -29,7 +29,7 @@ def main(argv):
                                                  attn_implementation=attn_implementation)
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
 
-    chat_template = "<|prompt|>Toimit henkilökohtaisena assistenttina. Tehtäväsi on vastata seuraavaan viestiin parhaan tietämyksesi mukaan. Viesti: {}<|response|>"
+    chat_template = "<|im_start|>system\nToimit henkilökohtaisena assistenttina. Tehtäväsi on vastata seuraavaan viestiin parhaan tietämyksesi mukaan. Vastaa viestiin kattavasti, mutta älä kuitenkaan toista itseäsi tai kirjoita mitään ylimääräistä. Kerro vastauksesi seuraavan indikaattorin jälkeen.\n<|im_start|>user\n{}\n<|im_start|>assistant\n"
 
     while True:
         usr_in = input("Message: ")
