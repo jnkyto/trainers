@@ -15,6 +15,7 @@ def argparser():
     ap.add_argument("--model", type=str, default=default_model)
     ap.add_argument("--tokenizer", type=str, default=default_tokenizer)
     ap.add_argument("--flash_attn", action="store_true")
+    ap.add_argument("--penalty", type=float, default=1.1)
     return ap
 
 
@@ -35,7 +36,7 @@ def main(argv):
         prompt = chat_template.format(usr_in)
         decoded = tokenizer.decode(
             model.generate(**tokenizer(prompt, return_tensors="pt").to("cuda"), max_new_tokens=128, do_sample=True,
-                           top_k=30, num_beams=2, length_penalty=1.08, repetition_penalty=1.08)[0])
+                           top_k=30, num_beams=2, length_penalty=args.penalty, repetition_penalty=args.penalty)[0])
         print(str(decoded).split("<|response|>", 1)[1] + "\n")
 
 
