@@ -36,8 +36,8 @@ def main(argv):
         prompt = chat_template.format(usr_in)
         decoded = tokenizer.decode(
             model.generate(**tokenizer(prompt, return_tensors="pt").to("cuda"), max_new_tokens=128, do_sample=True,
-                           top_k=30, num_beams=2, length_penalty=args.penalty, repetition_penalty=args.penalty)[0])
-        print(str(decoded).split("<|response|>", 1)[1] + "\n")
+                           top_k=30, repetition_penalty=args.penalty)[0])
+        print(str(decoded).split("\n<|im_start|>assistant\n", 1)[1] + "\n")
 
 
 if __name__ == "__main__":
