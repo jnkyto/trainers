@@ -20,6 +20,7 @@ def argparser():
     ap.add_argument("--model", type=str, default=default_model)
     ap.add_argument("--dry_run", action="store_true")
     ap.add_argument("--test_break", type=int, default=0)
+    ap.add_argument("--flash_attn", action="store_true")
     return ap
 
 
