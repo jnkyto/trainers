@@ -2,7 +2,6 @@
 # MIT ⓒ2024 Joona Kytöniemi
 # Translate ORPO-formatted data from English to Finnish using Poro
 
-import os
 import sys
 import json
 import torch
@@ -20,6 +19,7 @@ def argparser():
     ap.add_argument("--tokenizer", type=str, default=default_tokenizer)
     ap.add_argument("--model", type=str, default=default_model)
     ap.add_argument("--dry_run", action="store_true")
+    ap.add_argument("--test_break", type=int, default=0)
     return ap
 
 
@@ -63,6 +63,10 @@ def main(argv):
                 fi_sample[keys[j]] = pred
             print(fi_sample)
             fi_samples.append(fi_sample)
+
+            if args.test_break != 0:
+                if i == args.test_break:
+                    break
 
         for line in fi_samples:
             args.output.write(json.dumps(line) + "\n")
