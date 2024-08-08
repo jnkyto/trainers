@@ -67,10 +67,11 @@ def main(argv):
 
             if args.test_break != 0:
                 if i == args.test_break:
+                    print("Halting on test break.")
                     break
 
         for line in fi_samples:
-            args.output.write(json.dumps(line) + "\n")
+            args.output.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 
 if __name__ == "__main__":
