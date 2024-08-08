@@ -48,7 +48,7 @@ def main(argv):
             print(f"Starting translation of sample {i} out of {len(en_samples)}.")
             fi_sample = {}
             for j, entry in enumerate(en_sample):
-                prompt = template.format(entry)
+                prompt = template.format(en_sample[entry])
                 encoded = tokenizer(prompt, return_tensors='pt').to(model.device)
                 output = model.generate(**encoded, max_length=256)
                 decoded = tokenizer.decode(output[0])
