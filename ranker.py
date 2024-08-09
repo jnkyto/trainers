@@ -20,15 +20,15 @@ def main(argv):
             samples.append(json.loads(line))
 
     for i, sample in enumerate(samples):
-        print(f"Question ID {sample['question_id']}, Sample {i + 1} out of {len(samples)}:")
+        print("\n" * 5)
+        print(f"--> Viewing mode")
+        print(f"Question ID {sample['question_id']}, Sample {i + 1} out of {len(samples)}:\n")
         keyset = {"turns": 0, "reference": 0}
 
         for key in keyset:
             if key in sample:
                 keyset[key] += 1
             if keyset[key] > 0:
-                print("\n" * 5)
-                print(f"--> Viewing mode\n")
                 print("Key: " + "\033[1m" + key + "\033[0m" + ";")
                 for j, entry in enumerate(sample[key]):
                     prefix = f"{[j]}: "
