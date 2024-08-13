@@ -96,12 +96,21 @@ def main(argv):
 
                 pred = pred.rstrip('\n')
                 pred_split = pred.split(break_indicator)
-                assert len(pred_split) == 3
+
+                if len(pred_split) != 3:
+                    print(f"\n[WARN]: Split prediction length mismatched! (length {len(pred_split)} != 3)")
+                    print(f"{pred}\n")
+                    continue
 
                 for m, entry in enumerate(pred_split):
                     fi_sample[keys[m]] = entry
                 print(fi_sample)
                 fi_samples.append(fi_sample)
+
+                if args.test_break != 0:
+                    if n == args.test_break:
+                        print("Halting on test break.")
+                        break
 
 
         for line in fi_samples:
