@@ -73,7 +73,7 @@ def main(argv):
                         break
         else:
             print('Using the all-new "translate-every-key-at-once" -functionality.')
-            break_indicator = "<|br|>"
+            break_indicator = "\n"
             for n, sample in enumerate(en_samples):
                 print(f"Starting translation of sample {n} out of {len(en_samples)}.")
                 fi_sample = {}
