@@ -21,6 +21,7 @@ def argparser():
     ap.add_argument("--dry_run", action="store_true")
     ap.add_argument("--test_break", type=int, default=0)
     ap.add_argument("--flash_attn", action="store_true")
+    ap.add_argument("--at_once", action="store_true")
     return ap
 
 
@@ -42,13 +43,46 @@ def main(argv):
 
         template = "<|user|>Käännä suomeksi: {} <|assistant|>"
         keys = ["prompt", "chosen", "rejected"]
-
         fi_samples = []
-        for i, en_sample in enumerate(en_samples):
-            print(f"Starting translation of sample {i} out of {len(en_samples)}.")
-            fi_sample = {}
-            for j, entry in enumerate(en_sample):
-                prompt = template.format(en_sample[entry])
+
+        if not args.at_once:
+            for i, en_sample in enumerate(en_samples):
+                print(f"Starting translation of sample {i} out of {len(en_samples)}.")
+                fi_sample = {}
+                for j, entry in enumerate(en_sample):
+                    prompt = template.format(en_sample[entry])
+                    encoded = tokenizer(prompt, return_tensors='pt').to(model.device)
+                    output = model.generate(**encoded, max_length=256)
+                    decoded = tokenizer.decode(output[0])
+
+                    assert decoded.startswith(prompt)
+                    pred = decoded[len(prompt):]
+                    pred = pred.rstrip('\n')
+
+                    if pred.endswith(tokenizer.eos_token):
+                        pred = pred[:-len(tokenizer.eos_token)]
+
+                    pred = pred.rstrip('\n')
+                    fi_sample[keys[j]] = pred
+                print(fi_sample)
+                fi_samples.append(fi_sample)
+
+                if args.test_break != 0:
+                    if i == args.test_break:
+                        print("Halting on test break.")
+                        break
+        else:
+            print('Using the all-new "translate-every-key-at-once" -functionality.')
+            break_indicator = "<|br|>"
+            for n, sample in enumerate(en_samples):
+                print(f"Starting translation of sample {n} out of {len(en_samples)}.")
+                fi_sample = {}
+                prompt = ""
+                for k, key in enumerate(keys):
+                    prompt += sample[key]
+                    if k+1 < len(keys):
+                        prompt += break_indicator
+                prompt = template.format(prompt)
                 encoded = tokenizer(prompt, return_tensors='pt').to(model.device)
                 output = model.generate(**encoded, max_length=256)
                 decoded = tokenizer.decode(output[0])
@@ -61,14 +95,13 @@ def main(argv):
                     pred = pred[:-len(tokenizer.eos_token)]
 
                 pred = pred.rstrip('\n')
-                fi_sample[keys[j]] = pred
-            print(fi_sample)
-            fi_samples.append(fi_sample)
+                pred_split = pred.split(break_indicator)
+                assert len(pred_split) == 3
 
-            if args.test_break != 0:
-                if i == args.test_break:
-                    print("Halting on test break.")
-                    break
+                for m, entry in enumerate(pred_split):
+                    fi_sample[keys[m]] = entry
+                fi_samples.append(fi_sample)
+
 
         for line in fi_samples:
             args.output.write(json.dumps(line, ensure_ascii=False) + "\n")
