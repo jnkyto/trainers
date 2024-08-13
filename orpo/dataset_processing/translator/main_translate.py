@@ -100,6 +100,7 @@ def main(argv):
 
                 for m, entry in enumerate(pred_split):
                     fi_sample[keys[m]] = entry
+                print(fi_sample)
                 fi_samples.append(fi_sample)
 
 
