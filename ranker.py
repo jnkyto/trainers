@@ -54,10 +54,12 @@ def main(argv):
                         new_value = input(f"Enter new value for {key} {idx}: ").strip()
                         sample[key][idx] = new_value
 
+    """
     # Save the modified samples back to the output file
     with open(args.output, 'w') as f_out:
         for sample in samples:
             f_out.write(json.dumps(sample, ensure_ascii=False) + '\n')
+     """
 
 
 if __name__ == "__main__":

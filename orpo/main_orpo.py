@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # MIT ⓒ2024 Joona Kytöniemi
-# Multi-node ORPO Trainer for instructional datasets
+# Multi-node ORPO Trainer for instruction datasets
 
 import os
 import sys
