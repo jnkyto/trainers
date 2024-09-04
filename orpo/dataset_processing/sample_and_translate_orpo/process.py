@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 # MIT ⓒ2024 Joona Kytöniemi
 
+# NOTE:
+# This script is currently at an unfinished state
+
 import os
 import sys
 import pandas as pd
 from argparse import ArgumentParser
+from sampler import sampler
 
 _root_data_directory = "../../../data/en_fi"
 _file_paths = {
@@ -38,22 +42,30 @@ def check_input_files_present(root_dir, file_paths):
         assert os.path.exists(f"{root_dir}/{directory}")
         for file in file_paths[directory]:
             assert os.path.isfile(f"{root_dir}/{directory}/{file}")
-    print("Files validated successfully.")
+    print("File presence validated successfully.")
 
 
 def main(args):
     check_input_files_present(_root_data_directory, _file_paths)
-    all_samples = []
+    print("Gathering all of the samples. This might take a while.")
+    all_df = pd.DataFrame()
     for directory in _file_paths:
+        dataset_samples = []
         for i, file in enumerate(_file_paths[directory]):
-            samples = []
             with open(f"{_root_data_directory}/{directory}/{file}", 'r') as f:
                 for line in f:
                     key = "en" if i == 0 else "fi"
-                    samples.append({key: line})
-            all_samples.append(samples)
+                    if i != 0:
+                        dataset_samples[i][key] = line.rstrip("\n")
+                    else:
+                        dataset_samples.append({key: line})
+        temp_df = pd.DataFrame.from_dict(dataset_samples)
+        temp_df = sampler(dframe=temp_df, bands=10, per=20, thold=0.1)
+        all_df.append(temp_df)
 
-    print(all_samples[0:10])
+    # TODO: Make everything above work and export sampled data to a single jsonl-file
+    # The data structure is invalid currently
+
 
 
 if __name__ == "__main__":

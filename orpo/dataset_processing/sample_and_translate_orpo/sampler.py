@@ -43,10 +43,6 @@ def sampler(dframe: pd.DataFrame, bands: int, per: int, thold: float):
         else:
             band_loc = int(low_b + band_no * band_len)
 
-        phase_dict["band_loc"] = band_loc
-        phase_dict["band_no"] = band_no
-        phase_dict["median_len"] = len(df_list[band_loc][0].split())
-
         high_t = int(band_loc + (band_len * thold))
         low_t = int(band_loc - (band_len * thold))
 

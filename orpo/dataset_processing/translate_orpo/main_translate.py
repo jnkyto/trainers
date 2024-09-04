@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # MIT ⓒ2024 Joona Kytöniemi
+
 # Translate ORPO-formatted data from English to Finnish using Poro
 
 import sys
@@ -80,7 +81,7 @@ def main(argv):
                 prompt = ""
                 for k, key in enumerate(keys):
                     prompt += sample[key]
-                    if k+1 < len(keys):
+                    if k + 1 < len(keys):
                         prompt += break_indicator
                 prompt = template.format(prompt)
                 encoded = tokenizer(prompt, return_tensors='pt').to(model.device)
@@ -112,10 +113,9 @@ def main(argv):
                         print("Halting on test break.")
                         break
 
-
         for line in fi_samples:
             args.output.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))        
+    sys.exit(main(sys.argv))
