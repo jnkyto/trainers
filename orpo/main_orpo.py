@@ -11,6 +11,7 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 import torch.cuda
+from torch.profiler import profile, ProfilerActivity
 
 from peft import LoraConfig, PeftModel
 from accelerate.utils import set_seed
@@ -70,6 +71,10 @@ def argparser():
 def main(argv):
     args = argparser().parse_args(argv[1:])
     set_seed(args.seed)
+
+    # Set up profiler
+    prof = profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True, with_flops=True)
+    prof.start()
 
     ds = load_dataset("json", data_files=args.input_data)["train"]
     select_len = len(ds) if len(ds) < args.data_length else args.data_length
@@ -192,6 +197,10 @@ def main(argv):
 
         trainer.accelerator.wait_for_everyone()
         trainer.accelerator.end_training()
+
+        prof.stop()
+        prof.export_chrome_trace(f"{args.model_save_dir}/trace.json")
+
         return 0
 
 
