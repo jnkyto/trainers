@@ -75,6 +75,7 @@ def main(argv):
     # Set up profiler
     prof = profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], profile_memory=True, with_flops=True)
     prof.start()
+    saved_model_name = ""
 
     ds = load_dataset("json", data_files=args.input_data)["train"]
     select_len = len(ds) if len(ds) < args.data_length else args.data_length
@@ -176,7 +177,7 @@ def main(argv):
             if not os.path.exists(args.model_save_dir):
                 os.makedirs(args.model_save_dir)
 
-            saved_model_name = f"{curr_date}-{str(args.model).split('/')[1]}"
+            saved_model_name += f"{curr_date}-{str(args.model).split('/')[1]}"
             unwrapped_model.save_pretrained(
                 f"{args.model_save_dir}/{saved_model_name}",
                 state_dict=state_dict,
@@ -199,7 +200,7 @@ def main(argv):
         trainer.accelerator.end_training()
 
         prof.stop()
-        prof.export_chrome_trace(f"{args.model_save_dir}/trace.json")
+        prof.export_chrome_trace(f"{args.model_save_dir}/{saved_model_name}/trace.json")
 
         return 0
 
