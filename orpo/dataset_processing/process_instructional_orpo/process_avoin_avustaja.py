@@ -15,9 +15,6 @@ def argparse():
     ap.add_argument("--input", type=FileType('r'), metavar='F', required=True)
     ap.add_argument("--output", type=FileType('w+'), metavar='F', required=True)
     ap.add_argument("--label_override", action="store_true")
-    # TODO: Need to implement args in a different way where they can be freely accessed within every method
-    # ap.add_argument("--prefix", type=str, default=default_prefix)
-    # ap.add_argument("--suffix", type=str, default=default_suffix)
     return ap
 
 
